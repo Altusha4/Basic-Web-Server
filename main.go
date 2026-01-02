@@ -20,4 +20,9 @@ func main() {
 	mux.HandleFunc("DELETE /timetable/{id}", handler.DeleteTimetable)
 	mux.HandleFunc("GET /stats", handler.GetStats)
 
+	server := &http.Server{
+		Addr:    ":8080",
+		Handler: mux,
+	}
+
 }
