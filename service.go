@@ -11,3 +11,8 @@ func NewTimetableService(storage *TimetableStorage) *TimetableService {
 		storage: storage,
 	}
 }
+
+func (s *TimetableService) AddEntry(entry TimetableEntry) {
+	s.totalRequests++
+	s.storage.Add(entry)
+}
