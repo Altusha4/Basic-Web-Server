@@ -40,3 +40,9 @@ func (s *TimetableStorage) Delete(id string) bool {
 	}
 	return false
 }
+
+func (s *TimetableStorage) Count() int {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	return len(s.data)
+}
