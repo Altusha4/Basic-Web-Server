@@ -25,4 +25,13 @@ func main() {
 		Handler: mux,
 	}
 
+	ctx, stop := signal.NotifyContext(
+		context.Background(),
+		os.Interrupt,
+		syscall.SIGTERM,
+	)
+	defer stop()
+
+	go StartBackgroundWorker(ctx, service)
+
 }
