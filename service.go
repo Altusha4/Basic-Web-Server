@@ -5,3 +5,9 @@ type TimetableService struct {
 
 	totalRequests int
 }
+
+func NewTimetableService(storage *TimetableStorage) *TimetableService {
+	return &TimetableService{
+		storage: storage,
+	}
+}
