@@ -16,3 +16,8 @@ func (s *TimetableService) AddEntry(entry TimetableEntry) {
 	s.totalRequests++
 	s.storage.Add(entry)
 }
+
+func (s *TimetableService) GetAllEntries() map[string]TimetableEntry {
+	s.totalRequests++
+	return s.storage.GetAll()
+}
