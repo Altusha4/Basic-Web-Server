@@ -18,3 +18,14 @@ func (s *TimetableStorage) Add(entry TimetableEntry) {
 	defer s.mu.Unlock()
 	s.data[entry.ID] = entry
 }
+
+func (s *TimetableStorage) GetAll() map[string]TimetableEntry {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	result := make(map[string]TimetableEntry)
+	for k, v := range s.data {
+		result[k] = v
+	}
+	return result
+}
