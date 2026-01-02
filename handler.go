@@ -49,3 +49,15 @@ func (h *TimetableHandler) DeleteTimetable(w http.ResponseWriter, r *http.Reques
 
 	w.WriteHeader(http.StatusOK)
 }
+
+func (h *TimetableHandler) GetStats(w http.ResponseWriter, r *http.Request) {
+	requests, entries := h.service.Stats()
+
+	response := map[string]int{
+		"total_requests": requests,
+		"total_entries":  entries,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
