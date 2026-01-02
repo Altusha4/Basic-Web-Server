@@ -40,4 +40,13 @@ func main() {
 			log.Fatalf("server error: %v", err)
 		}
 	}()
+
+	<-ctx.Done()
+	log.Println("Shutdown signal received")
+
+	if err := server.Shutdown(context.Background()); err != nil {
+		log.Printf("shutdown error: %v", err)
+	}
+
+	log.Println("Server stopped")
 }
