@@ -8,3 +8,9 @@ import (
 	"os/signal"
 	"syscall"
 )
+
+func main() {
+	storage := NewTimetableStorage()
+	service := NewTimetableService(storage)
+	handler := NewTimetableHandler(service)
+}
