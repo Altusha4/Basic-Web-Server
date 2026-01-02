@@ -34,4 +34,10 @@ func main() {
 
 	go StartBackgroundWorker(ctx, service)
 
+	go func() {
+		log.Println("Server started on :8080")
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("server error: %v", err)
+		}
+	}()
 }
