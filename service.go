@@ -21,3 +21,8 @@ func (s *TimetableService) GetAllEntries() map[string]TimetableEntry {
 	s.totalRequests++
 	return s.storage.GetAll()
 }
+
+func (s *TimetableService) DeleteEntry(id string) bool {
+	s.totalRequests++
+	return s.storage.Delete(id)
+}
