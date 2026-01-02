@@ -12,3 +12,9 @@ func NewTimetableStorage() *TimetableStorage {
 		data: make(map[string]TimetableEntry),
 	}
 }
+
+func (s *TimetableStorage) Add(entry TimetableEntry) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.data[entry.ID] = entry
+}
