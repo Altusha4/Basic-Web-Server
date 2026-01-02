@@ -26,3 +26,10 @@ func (h *TimetableHandler) CreateTimetable(w http.ResponseWriter, r *http.Reques
 	h.service.AddEntry(entry)
 	w.WriteHeader(http.StatusCreated)
 }
+
+func (h *TimetableHandler) GetTimetable(w http.ResponseWriter, r *http.Request) {
+	data := h.service.GetAllEntries()
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(data)
+}
