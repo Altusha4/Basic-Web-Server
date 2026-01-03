@@ -110,4 +110,76 @@ Minimum required:
 {
   "total_requests": 10
 }
+```
 
+# How to Run the Project
+
+## Install Go
+Make sure Go is installed:
+```
+go version
+```
+Run the server
+```
+go run .
+```
+Server address
+```
+http://localhost:8080
+```
+Example Usage (curl)
+Add data
+```
+curl -X POST http://localhost:8080/data \
+  -H "Content-Type: application/json" \
+  -d '{"id":"SE-2416","subject":"ADP1","day":"Wednesday","time":"14:00","room":"C1.1.239","teacher":"Nurlybek"}'
+```
+Get all data
+```
+curl http://localhost:8080/data
+```
+Delete data
+```
+curl -X DELETE http://localhost:8080/data/CS101
+```
+Get statistics
+```
+curl http://localhost:8080/stats
+```
+## How It Works
+
+### Request Flow
+- Client sends an HTTP request  
+- `net/http` spawns a new goroutine for the request  
+- Handler processes the request logic  
+- Mutex protects shared state (map and counters)  
+- Response is returned as JSON  
+
+### Background Process
+- Background worker runs in a separate goroutine  
+- Logs server status every 5 seconds  
+- Uses `select-case` for multiplexing  
+- Stops cleanly on context cancellation  
+
+---
+
+## Assignment Compliance
+
+✔ net/http web server  
+✔ Concurrent request handling  
+✔ Mutex-protected shared state  
+✔ Background worker (goroutine)  
+✔ select-case usage  
+✔ Context-based graceful shutdown  
+✔ REST API endpoints  
+✔ `/stats` endpoint implemented  
+
+Fully complies with Assignment 2 requirements.
+
+---
+
+## Author
+
+Altynay Yertay  
+Software Engineering Student  
+Astana IT University
