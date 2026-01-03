@@ -53,7 +53,59 @@ The server stores structured JSON data using the following model:
   "subject": "Advanced Programming",
   "day": "Wednesday",
   "time": "14:00-15:50",
-  "room": "A-301",
+  "room": "С1.1.239",
   "teacher": "Nurlybek T."
 }
 
+## Project Structure
+
+.
+├── main.go        # Server startup & graceful shutdown  
+├── model.go       # TimetableEntry data model  
+├── storage.go     # In-memory storage with mutex protection  
+├── service.go     # Business logic layer  
+├── handler.go     # HTTP handlers & statistics  
+├── worker.go      # Background worker (periodic logging)  
+├── go.mod         # Go module definition  
+└── README.md  
+
+---
+
+## Concurrency & Thread Safety
+
+- net/http automatically handles each request in a separate goroutine  
+- Shared resources are protected using:  
+  - sync.RWMutex for the in-memory map  
+  - sync.Mutex for request counters  
+- Prevents race conditions during concurrent access  
+
+---
+
+## Background Worker
+
+- Runs in a separate goroutine  
+- Logs server status every 5 seconds  
+- Uses time.Ticker and select statement  
+- Stops cleanly when shutdown signal is received  
+
+
+---
+
+## Graceful Shutdown
+
+- Implemented using context.Context  
+- OS signals (Ctrl+C, SIGTERM) are captured  
+- Server shuts down without interrupting active requests  
+- Background worker stops gracefully  
+
+This follows industry-standard practices.
+
+---
+
+## Server Statistics (/stats)
+
+Minimum required:
+```json
+{
+  "total_requests": 10
+}
