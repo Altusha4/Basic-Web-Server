@@ -6,22 +6,14 @@ import (
 	"time"
 )
 
-func StartBackgroundWorker(
-	ctx context.Context,
-	service *TimetableService,
-) {
+func StartBackgroundWorker(ctx context.Context) {
 	ticker := time.NewTicker(5 * time.Second)
 	defer ticker.Stop()
 
 	for {
 		select {
 		case <-ticker.C:
-			requests, entries := service.Stats()
-			log.Printf(
-				"Timetable status: requests=%d, entries=%d",
-				requests,
-				entries,
-			)
+			log.Println("Timetable server is running")
 
 		case <-ctx.Done():
 			log.Println("Background worker stopped")

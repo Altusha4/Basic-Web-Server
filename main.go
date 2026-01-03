@@ -32,7 +32,7 @@ func main() {
 	)
 	defer stop()
 
-	go StartBackgroundWorker(ctx, service)
+	go StartBackgroundWorker(ctx)
 
 	go func() {
 		log.Println("Server started on :8080")

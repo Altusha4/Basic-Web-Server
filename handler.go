@@ -3,10 +3,14 @@ package main
 import (
 	"encoding/json"
 	"net/http"
+	"sync"
 )
 
 type TimetableHandler struct {
 	service *TimetableService
+
+	mu       sync.Mutex
+	requests int
 }
 
 func NewTimetableHandler(service *TimetableService) *TimetableHandler {
@@ -16,10 +20,18 @@ func NewTimetableHandler(service *TimetableService) *TimetableHandler {
 }
 
 func (h *TimetableHandler) CreateTimetable(w http.ResponseWriter, r *http.Request) {
-	var entry TimetableEntry
+	h.mu.Lock()
+	h.requests++
+	h.mu.Unlock()
 
+	var entry TimetableEntry
 	if err := json.NewDecoder(r.Body).Decode(&entry); err != nil {
 		http.Error(w, "invalid JSON", http.StatusBadRequest)
+		return
+	}
+
+	if entry.ID == "" {
+		http.Error(w, "id is required", http.StatusBadRequest)
 		return
 	}
 
@@ -28,6 +40,10 @@ func (h *TimetableHandler) CreateTimetable(w http.ResponseWriter, r *http.Reques
 }
 
 func (h *TimetableHandler) GetTimetable(w http.ResponseWriter, r *http.Request) {
+	h.mu.Lock()
+	h.requests++
+	h.mu.Unlock()
+
 	data := h.service.GetAllEntries()
 
 	w.Header().Set("Content-Type", "application/json")
@@ -35,8 +51,11 @@ func (h *TimetableHandler) GetTimetable(w http.ResponseWriter, r *http.Request) 
 }
 
 func (h *TimetableHandler) DeleteTimetable(w http.ResponseWriter, r *http.Request) {
-	id := r.PathValue("id")
+	h.mu.Lock()
+	h.requests++
+	h.mu.Unlock()
 
+	id := r.PathValue("id")
 	if id == "" {
 		http.Error(w, "missing id", http.StatusBadRequest)
 		return
@@ -51,11 +70,14 @@ func (h *TimetableHandler) DeleteTimetable(w http.ResponseWriter, r *http.Reques
 }
 
 func (h *TimetableHandler) GetStats(w http.ResponseWriter, r *http.Request) {
-	requests, entries := h.service.Stats()
+	h.mu.Lock()
+	h.requests++
+	req := h.requests
+	h.mu.Unlock()
 
 	response := map[string]int{
-		"total_requests": requests,
-		"total_entries":  entries,
+		"total_requests": req,
+		"total_entries":  h.service.Count(),
 	}
 
 	w.Header().Set("Content-Type", "application/json")
