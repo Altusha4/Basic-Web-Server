@@ -10,14 +10,14 @@ import (
 )
 
 func main() {
-	storage := NewTimetableStorage()
-	service := NewTimetableService(storage)
-	handler := NewTimetableHandler(service)
+	storage := NewDataStorage()
+	service := NewDataService(storage)
+	handler := NewDataHandler(service)
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("POST /timetable", handler.CreateTimetable)
-	mux.HandleFunc("GET /timetable", handler.GetTimetable)
-	mux.HandleFunc("DELETE /timetable/{id}", handler.DeleteTimetable)
+	mux.HandleFunc("POST /data", handler.PostData)
+	mux.HandleFunc("GET /data", handler.GetData)
+	mux.HandleFunc("DELETE /data/{key}", handler.DeleteData)
 	mux.HandleFunc("GET /stats", handler.GetStats)
 
 	server := &http.Server{
@@ -25,14 +25,10 @@ func main() {
 		Handler: mux,
 	}
 
-	ctx, stop := signal.NotifyContext(
-		context.Background(),
-		os.Interrupt,
-		syscall.SIGTERM,
-	)
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
-	go StartBackgroundWorker(ctx)
+	go StartBackgroundWorker(ctx, handler)
 
 	go func() {
 		log.Println("Server started on :8080")

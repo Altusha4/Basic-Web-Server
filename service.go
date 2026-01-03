@@ -1,27 +1,25 @@
 package main
 
-type TimetableService struct {
-	storage *TimetableStorage
+type DataService struct {
+	storage *DataStorage
 }
 
-func NewTimetableService(storage *TimetableStorage) *TimetableService {
-	return &TimetableService{
-		storage: storage,
-	}
+func NewDataService(storage *DataStorage) *DataService {
+	return &DataService{storage: storage}
 }
 
-func (s *TimetableService) AddEntry(entry TimetableEntry) {
-	s.storage.Add(entry)
+func (s *DataService) SaveEntry(entry TimetableEntry) {
+	s.storage.Set(entry.ID, entry)
 }
 
-func (s *TimetableService) GetAllEntries() map[string]TimetableEntry {
+func (s *DataService) GetAll() map[string]TimetableEntry {
 	return s.storage.GetAll()
 }
 
-func (s *TimetableService) DeleteEntry(id string) bool {
-	return s.storage.Delete(id)
+func (s *DataService) Delete(key string) bool {
+	return s.storage.Delete(key)
 }
 
-func (s *TimetableService) Count() int {
+func (s *DataService) Count() int {
 	return s.storage.Count()
 }

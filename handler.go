@@ -6,23 +6,31 @@ import (
 	"sync"
 )
 
-type TimetableHandler struct {
-	service *TimetableService
+type DataHandler struct {
+	service *DataService
 
 	mu       sync.Mutex
 	requests int
 }
 
-func NewTimetableHandler(service *TimetableService) *TimetableHandler {
-	return &TimetableHandler{
-		service: service,
-	}
+func NewDataHandler(service *DataService) *DataHandler {
+	return &DataHandler{service: service}
 }
 
-func (h *TimetableHandler) CreateTimetable(w http.ResponseWriter, r *http.Request) {
+func (h *DataHandler) incRequests() {
 	h.mu.Lock()
 	h.requests++
 	h.mu.Unlock()
+}
+
+func (h *DataHandler) getRequests() int {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	return h.requests
+}
+
+func (h *DataHandler) PostData(w http.ResponseWriter, r *http.Request) {
+	h.incRequests()
 
 	var entry TimetableEntry
 	if err := json.NewDecoder(r.Body).Decode(&entry); err != nil {
@@ -31,55 +39,51 @@ func (h *TimetableHandler) CreateTimetable(w http.ResponseWriter, r *http.Reques
 	}
 
 	if entry.ID == "" {
-		http.Error(w, "id is required", http.StatusBadRequest)
+		http.Error(w, "id is required (used as key)", http.StatusBadRequest)
 		return
 	}
 
-	h.service.AddEntry(entry)
+	h.service.SaveEntry(entry)
 	w.WriteHeader(http.StatusCreated)
 }
 
-func (h *TimetableHandler) GetTimetable(w http.ResponseWriter, r *http.Request) {
-	h.mu.Lock()
-	h.requests++
-	h.mu.Unlock()
+func (h *DataHandler) GetData(w http.ResponseWriter, r *http.Request) {
+	h.incRequests()
 
-	data := h.service.GetAllEntries()
-
+	data := h.service.GetAll()
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(data)
+	_ = json.NewEncoder(w).Encode(data)
 }
 
-func (h *TimetableHandler) DeleteTimetable(w http.ResponseWriter, r *http.Request) {
-	h.mu.Lock()
-	h.requests++
-	h.mu.Unlock()
+func (h *DataHandler) DeleteData(w http.ResponseWriter, r *http.Request) {
+	h.incRequests()
 
-	id := r.PathValue("id")
-	if id == "" {
-		http.Error(w, "missing id", http.StatusBadRequest)
+	key := r.PathValue("key")
+	if key == "" {
+		http.Error(w, "missing key", http.StatusBadRequest)
 		return
 	}
 
-	if !h.service.DeleteEntry(id) {
-		http.Error(w, "entry not found", http.StatusNotFound)
+	if !h.service.Delete(key) {
+		http.Error(w, "key not found", http.StatusNotFound)
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
 }
 
-func (h *TimetableHandler) GetStats(w http.ResponseWriter, r *http.Request) {
-	h.mu.Lock()
-	h.requests++
-	req := h.requests
-	h.mu.Unlock()
+func (h *DataHandler) GetStats(w http.ResponseWriter, r *http.Request) {
+	h.incRequests()
 
-	response := map[string]int{
-		"total_requests": req,
-		"total_entries":  h.service.Count(),
+	resp := map[string]int{
+		"total_requests": h.getRequests(),
+		"db_size":        h.service.Count(),
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+	_ = json.NewEncoder(w).Encode(resp)
+}
+
+func (h *DataHandler) StatsSnapshot() (int, int) {
+	return h.getRequests(), h.service.Count()
 }
