@@ -56,6 +56,7 @@ The server stores structured JSON data using the following model:
   "room": "С1.1.239",
   "teacher": "Nurlybek T."
 }
+```
 
 ## Project Structure
 
@@ -109,3 +110,4 @@ Minimum required:
 {
   "total_requests": 10
 }
+
